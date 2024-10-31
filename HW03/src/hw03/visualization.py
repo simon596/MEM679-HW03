@@ -10,8 +10,6 @@ import seaborn as sns
 import panel as pn
 import hvplot.pandas
 
-pn.extension()
-
 # Load the dataset
 file_path = './dataset/Dataset_PhaseSepVolumeFractionEstimation.csv'  # Relative path from root directory
 dataset = pd.read_csv(file_path)
@@ -36,53 +34,42 @@ plt.grid(True)
 plt.show()
 
 #%% interactive panel
+pn.extension()
 
-
-# Create widgets for interactive selection
-stiffness_select = pn.widgets.Select(
-    name='Relative Stiffness', 
-    options=dataset['Relative Stiffness'].unique().tolist()
-)
-concentration_slider = pn.widgets.FloatSlider(
-    name='Particle Concentration', 
-    start=dataset['Particle Concentration'].min(), 
-    end=dataset['Particle Concentration'].max(), 
-    step=0.1
+# Create a slider widget for "Vol of Particles After Settling (mL)"
+volume_slider = pn.widgets.FloatSlider(
+    name='Vol of Particles After Settling (mL)', 
+    start=dataset['Vol of Particles After Settling (mL)'].min(), 
+    end=dataset['Vol of Particles After Settling (mL)'].max(), 
+    step=0.5
 )
 
-# Define the plotting function, which will filter the dataset based on widget values
-@pn.depends(
-    stiffness=stiffness_select.param.value, 
-    concentration=concentration_slider.param.value
-)
-def violin_plot(stiffness, concentration):
-    # Filter dataset based on widget selections
-    filtered_data = dataset[
-        (dataset['Relative Stiffness'] == stiffness) & 
-        (dataset['Particle Concentration'] == concentration)
-    ]
+# Define the plotting function
+@pn.depends(volume=volume_slider.param.value)
+def histogram_plot(volume):
+    # Filter dataset based on the slider value
+    filtered_data = dataset[dataset['Vol of Particles After Settling (mL)'] >= volume]
     
-    # Plot violin plot
+    # Check if filtered_data is empty
+    if filtered_data.empty:
+        return "No data available for the selected volume."
+
+    # Plot histogram of "Relative Stiffness"
     plt.figure(figsize=(8, 5))
-    sns.violinplot(
-        x='Relative Stiffness', 
-        y='Est. Volume Fraction ', 
-        data=filtered_data
-    )
-    plt.title(f'Violin Plot of Estimated Volume Fraction\n'
-              f'Relative Stiffness: {stiffness}, Particle Concentration: {concentration}')
+    filtered_data['Relative Stiffness'].value_counts().plot(kind='bar')
+    plt.title(f'Histogram of Relative Stiffness\n(Vol of Particles After Settling >= {volume} mL)')
     plt.xlabel('Relative Stiffness')
-    plt.ylabel('Estimated Volume Fraction')
+    plt.ylabel('Frequency')
     plt.grid(True)
     plt.tight_layout()
     return plt.gcf()
 
 # Create the interactive layout
 interactive_panel = pn.Column(
-    "### Interactive Violin Plot of Estimated Volume Fraction",
-    "Adjust the sliders to filter data based on Relative Stiffness and Particle Concentration:",
-    pn.Row(stiffness_select, concentration_slider),
-    violin_plot
+    "### Interactive Histogram of Relative Stiffness",
+    "Adjust the slider to filter data based on 'Vol of Particles After Settling (mL)':",
+    volume_slider,
+    histogram_plot  # Include the function directly
 )
 
 # To display in a Jupyter notebook, use:
