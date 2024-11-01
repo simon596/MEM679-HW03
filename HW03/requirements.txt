@@ -66,7 +66,7 @@ pre_commit==4.0.1
 prompt_toolkit==3.0.39
 psutil==5.9.5
 pure_eval==0.2.2
-Pygments==2.16.1
+Pygments
 pyparsing==3.2.0
 pyproject-api==1.8.0
 PyScaffold==4.6
