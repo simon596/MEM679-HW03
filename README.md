@@ -28,7 +28,8 @@ pip install -r requirements.txt
 python ./src/hw03/visualization.py
 ```
 
-## Final Project: Segmentation of Hydrogel
+---
+# Final Project: Segmentation of Hydrogel
 
 Source files are located in directory *"./HW_03_04_final/src/final"*.
 ```bash
