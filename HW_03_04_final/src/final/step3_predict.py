@@ -16,47 +16,65 @@ import os
 import cv2
 from model.unet_model import UNet
 
-# todo 需要封装为函数
+# The following code is executed as a script and is designed for making predictions on input images using a UNet model.
 if __name__ == "__main__":
-    # 选择设备，有cuda用cuda，没有就用cpu
+    # Specify the directory where prediction results will be saved
     save_dir = "images/predict"
+    # Choose the device to use for prediction; 'cuda' if available, else 'cpu'
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print('device under using is {}'.format(device))
-    # 加载网络，图片单通道，分类为1。
+    print('Currently using device: {}'.format(device))
+    
+    # Initialize the UNet model with single input channel (grayscale) and single output class (binary segmentation)
     net = UNet(n_channels=1, n_classes=1)
-    # 将网络拷贝到deivce中
+    # Move the model to the selected device
     net.to(device=device)
-    # 加载模型参数
+    
+    # Load the saved model parameters
     net.load_state_dict(torch.load('best_model.pth', map_location=device))
-    # 测试模式
+    
+    # Set the model to evaluation mode for prediction
     net.eval()
-    # 读取所有图片路径
+    
+    # Retrieve a list of all PNG images in the specified directory
     tests_path = glob.glob('../raw_png/*.png')
-    # 遍历所有图片
+    
+    # Process each image file
     for i, test_path in enumerate(tests_path):
-        # 保存结果地址
+        # Construct the path to save the prediction result
         save_res_path = os.path.join(save_dir, os.path.basename(test_path))
-        # 读取图片
+        
+        # Read the input image
         img = cv2.imread(test_path)
         origin_shape = img.shape
-        # print(origin_shape)
-        # 转为灰度图
+        
+        # Convert the input image to grayscale
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        
+        # Resize the image to match the model input size (512 x 512)
         img = cv2.resize(img, (512, 512))
-        # 转为batch为1，通道为1，大小为512*512的数组
+        
+        # Reshape the image to include batch and channel dimensions: (batch=1, channel=1, width=512, height=512)
         img = img.reshape(1, 1, img.shape[0], img.shape[1])
-        # 转为tensor
+        
+        # Convert the NumPy array to a PyTorch tensor
         img_tensor = torch.from_numpy(img)
-        # 将tensor拷贝到device中，只用cpu就是拷贝到cpu中，用cuda就是拷贝到cuda中。
+        
+        # Move the tensor to the chosen device and ensure it's a float
         img_tensor = img_tensor.to(device=device, dtype=torch.float32)
-        # 预测
+        
+        # Perform prediction using the model
         pred = net(img_tensor)
-        # 提取结果
+        
+        # Convert the prediction output to a NumPy array and extract the first batch and channel
         pred = np.array(pred.data.cpu()[0])[0]
-        # 处理结果
+        
+        # Binarize the prediction results: values >= 0.5 become 255 (white), otherwise 0 (black)
         pred[pred >= 0.5] = 255
         pred[pred < 0.5] = 0
-        # 保存图片
+        
+        # Resize the prediction back to the original image size
         pred = cv2.resize(pred, (origin_shape[1], origin_shape[0]), interpolation=cv2.INTER_NEAREST)
+        
+        # Save the prediction mask as an image
         cv2.imwrite(save_res_path, pred)
-        print("{}: {}的预测结果已经保存在{}".format(i+1, test_path, save_res_path))
+        print("{}: The prediction result for {} has been saved to {}".format(i+1, test_path, save_res_path))

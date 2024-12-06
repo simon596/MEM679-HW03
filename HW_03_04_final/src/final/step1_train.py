@@ -20,73 +20,100 @@ import matplotlib.pyplot as plt
 
 
 def train_net(net, device, data_path, epochs=40, batch_size=1, lr=0.00001):
-    '''
+    """
+    Train a given semantic segmentation model on a specified dataset.
 
-    :param net: 语义分割网络
-    :param device: 网络训练所使用的设备
-    :param data_path: 数据集的路径
-    :param epochs: 训练的轮数
-    :param batch_size: 批次大小
-    :param lr: 学习率
-    :return:
-    '''
-    # 加载数据集
+    Args:
+        net (nn.Module): The semantic segmentation network to be trained.
+        device (torch.device): The device to be used for training (e.g., CPU or GPU).
+        data_path (str): Path to the dataset.
+        epochs (int): Number of training epochs.
+        batch_size (int): Size of each training batch.
+        lr (float): Learning rate.
+
+    Returns:
+        None
+    """
+
+    # Load the dataset
     dataset = Dateset_Loader(data_path)
     per_epoch_num = len(dataset) / batch_size
     train_loader = torch.utils.data.DataLoader(dataset=dataset,
                                                batch_size=batch_size,
                                                shuffle=True)
-    # 定义RMSprop算法，RMSProp算法（Root Mean Square Propagation）是一种自适应学习率的优化算法
-    # optimizer = optim.RMSprop(net.parameters(), lr=lr, weight_decay=1e-8, momentum=0.9)
-    optimizer = optim.Adam(net.parameters(),lr=lr,betas=(0.9, 0.999),eps=1e-08, weight_decay=1e-08,amsgrad=False) # 此处的优化算法可以修改为adam算法
-    # 定义Loss算法，此处使用的损失函数为二进制交叉熵损失函数
+    # Define the optimizer. Here we use the Adam optimizer. Previously, RMSProp was mentioned but commented out.
+    # Adam is chosen for its adaptive learning rate and often good performance.
+    optimizer = optim.Adam(net.parameters(), lr=lr, betas=(0.9, 0.999), eps=1e-08, weight_decay=1e-08, amsgrad=False)
+
+    # Define the loss function. Here we use binary cross-entropy with logits loss.
     criterion = nn.BCEWithLogitsLoss()
-    # best_loss统计，初始化为正无穷
+
+    # Initialize the best loss as infinity to track improvement over epochs.
     best_loss = float('inf')
-    # 开始训练
+
+    # List to record loss values over epochs
     loss_record = []
-    with tqdm(total=epochs*per_epoch_num) as pbar:
+
+    # The tqdm progress bar shows progress for total iterations over all epochs.
+    with tqdm(total=epochs * per_epoch_num) as pbar:
         for epoch in range(epochs):
-            # 训练模式
+            # Set the network in training mode
             net.train()
-            # 按照batch_size开始训练
+            # Iterate over batches
             for image, label in train_loader:
                 optimizer.zero_grad()
-                # 将数据拷贝到device中
+
+                # Transfer data to the specified device
                 image = image.to(device=device, dtype=torch.float32)
                 label = label.to(device=device, dtype=torch.float32)
+
+                # Forward pass
                 pred = net(image)
+
+                # Calculate loss
                 loss = criterion(pred, label)
-                pbar.set_description("Processing Epoch: {} Loss: {}".format(epoch+1, loss))
-                # 如果当前的损失比最好的损失小，则保存当前论次的模型
+
+                # Update the progress bar description with the current epoch and loss
+                pbar.set_description("Processing Epoch: {} Loss: {}".format(epoch + 1, loss))
+
+                # Save the model if the current loss is better than the previously recorded best
                 if loss < best_loss:
                     best_loss = loss
                     torch.save(net.state_dict(), 'best_model.pth')
+
+                # Backpropagate and update weights
                 loss.backward()
                 optimizer.step()
+
+                # Update the progress bar
                 pbar.update(1)
-            # print(loss.item())
+
+            # Record the loss after each epoch
             loss_record.append(loss.item())
 
-    # 绘制loss折线图
+    # Plot the training loss curve
     plt.figure()
-    # 绘制折线图
-    plt.plot([i+1 for i in range(0, len(loss_record))], loss_record)
-    # 添加标题和轴标签
+    plt.plot([i + 1 for i in range(0, len(loss_record))], loss_record)
     plt.title('Training Loss')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
     plt.savefig('results/training_loss.png')
 
+
 if __name__ == "__main__":
-    # 选择设备，有cuda用cuda，没有就用cpu
+    # Select device. Use GPU if available, otherwise CPU.
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # 设置输出的通道和输出的类别数目，这里的1表示执行的是二分类的任务
+
+    # Set input channels and output classes. Here, n_classes=1 means binary segmentation.
     net = UNet(n_channels=1, n_classes=1)
-    # 将网络拷贝到deivce中
+
+    # Move the network to the device
     net.to(device=device)
-    # 指定训练集地址，开始训练
-    data_path = "../NEW-SEG-DATA"  # todo 或者使用相对路径也是可以的
-    print("进度条出现卡着不动不是程序问题，是他正在计算，请耐心等待")
+
+    # Specify the dataset path and start training
+    data_path = "../NEW-SEG-DATA"  # You can also use a relative path
+    print("If the progress bar seems stuck, it might be computing. Please wait patiently.")
     time.sleep(1)
-    train_net(net, device, data_path, epochs=40, batch_size=1)  # 开始训练，如果你GPU的显存小于4G，这里只能使用CPU来进行训练。
+
+    # Start training. If GPU memory is insufficient, it will use CPU.
+    train_net(net, device, data_path, epochs=40, batch_size=1)

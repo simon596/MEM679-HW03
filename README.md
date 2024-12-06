@@ -31,3 +31,14 @@ python ./src/hw03/visualization.py
 ## Final Project: Segmentation of Hydrogel
 
 Source files are located in directory *"./HW_03_04_final/src/final"*.
+```bash
+# check CUDA version before installing Pytorch
+nvcc --version
+# install Pytorch (GPU version, cuda12.1 for example)
+conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
+# check installation
+python
+import torch
+print(torch.__version__)
+print(torch.cuda.is_available())
+```

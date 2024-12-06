@@ -115,3 +115,5 @@ webencodings==0.5.1
 wheel==0.44.0
 xyzservices==2024.9.0
 zipp==3.17.0
+opencv-python
+pyqt5
