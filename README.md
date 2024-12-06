@@ -27,3 +27,7 @@ pip install -r requirements.txt
 # to run the visualization, either run the ipynb, or type
 python ./src/hw03/visualization.py
 ```
+
+## Final Project: Segmentation of Hydrogel
+
+Source files are located in directory *"./HW03/src/final"*.
