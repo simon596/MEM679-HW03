@@ -1,3 +1,14 @@
+# -*-coding:utf-8 -*-
+
+"""
+#-------------------------------
+# Author: Simeng Wu
+# Email: sw3493@drexel.edu
+#-------------------------------
+
+#-------------------------------
+"""
+
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression

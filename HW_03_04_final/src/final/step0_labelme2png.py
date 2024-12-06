@@ -5,7 +5,7 @@
 # Author: Simeng Wu
 # Email: sw3493@drexel.edu
 #-------------------------------
-# Creation Date: Feb 28th, 2024, EST.
+
 #-------------------------------
 """
 

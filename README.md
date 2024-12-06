@@ -5,7 +5,7 @@ The data are a combination of *my lab data* and some online data credited to Ver
 ## Installation
 
 ```bash
-git clone https://github.com/simon596/MEM679-HW03.git
+git clone https://github.com/simon596/MEM679-HWnFinal.git
 ```
 
 ## Create Python environment
@@ -32,6 +32,7 @@ python ./src/hw03/visualization.py
 
 Source files are located in directory *"./HW_03_04_final/src/final"*.
 ```bash
+conda activate MEM679
 # check CUDA version before installing Pytorch
 nvcc --version
 # install Pytorch (GPU version, cuda12.1 for example)

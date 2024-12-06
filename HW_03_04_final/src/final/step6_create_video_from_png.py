@@ -1,3 +1,14 @@
+# -*-coding:utf-8 -*-
+
+"""
+#-------------------------------
+# Author: Simeng Wu
+# Email: sw3493@drexel.edu
+#-------------------------------
+
+#-------------------------------
+"""
+
 import cv2
 import os
 import glob
