@@ -18,9 +18,9 @@ import cv2
 from model.unet_model import UNet
 
 
-def cal_miou(test_dir="../DRIVE-SEG-DATA/Test_Images",
-             pred_dir="../DRIVE-SEG-DATA/results",
-             gt_dir="../DRIVE-SEG-DATA/Test_Labels",
+def cal_miou(test_dir=".../seg-data/Test_Images",
+             pred_dir="../seg-data/results",
+             gt_dir="../seg-data/Test_Labels",
              model_path='best_model_drive.pth'):
     """Calculate the mean Intersection-over-Union (mIoU) and other metrics.
 
@@ -38,7 +38,7 @@ def cal_miou(test_dir="../DRIVE-SEG-DATA/Test_Images",
         None. The function writes prediction images to the output directory and saves computed metrics.
     """
     # Define class names for display and metrics computation
-    name_classes = ["background", "vein"]
+    name_classes = ["background", "gel"]
     num_classes = len(name_classes)
 
     # Create the prediction directory if it does not exist

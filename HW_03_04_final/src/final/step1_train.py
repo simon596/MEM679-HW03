@@ -97,7 +97,7 @@ def train_net(net, device, data_path, epochs=40, batch_size=1, lr=0.00001):
     plt.title('Training Loss')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
-    plt.savefig('results/training_loss.png')
+    plt.savefig('.../results/training_loss.png')
 
 
 if __name__ == "__main__":
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     net.to(device=device)
 
     # Specify the dataset path and start training
-    data_path = "../NEW-SEG-DATA"  # You can also use a relative path
+    data_path = ".../seg-data"  # You can also use a relative path
     print("If the progress bar seems stuck, it might be computing. Please wait patiently.")
     time.sleep(1)
 
